@@ -3,18 +3,19 @@ if (!$response || $response.statusCode != 200) {
   $done({});
 }
 
-// 2. 基础函数定义
+// 2. 基础校验函数
 function City_ValidCheck(para) {
-  return para ? para : "高谭市";
+  return para ? para : "未知地区";
 }
 
 function Area_check(para) {
-  return para === "中华民国" ? "台湾" : (para ? para : "Unknown");
+  if(para === "中华民国") return "台湾";
+  return para ? para : "未知国家";
 }
 
-// 3. 国旗映射表 (由你的代码库精简)
+// 3. 国旗映射表 (特殊修正，其余代码会自动补全)
 const flags = new Map([
-  ["CN","🇨🇳"],["HK","🇭🇰"],["TW","🇨🇳"],["SG","🇸🇬"],["US","🇺🇸"],["JP","🇯🇵"],["KR","🇰🇷"],["GB","🇬🇧"],["MO","🇲🇴"]
+  ["CN","🇨🇳"],["HK","🇭🇰"],["TW","🇨🇳"],["SG","🇸🇬"],["US","🇺🇸"],["JP","🇯🇵"],["KR","🇰🇷"]
 ]);
 
 // 4. 解析与显示逻辑
@@ -22,33 +23,34 @@ try {
   const obj = JSON.parse($response.body);
   const code = obj['countryCode'];
   
-  // 获取国旗：Map 中没有则根据代码自动生成
+  // 自动获取/生成国旗 Emoji
   const emoji = flags.get(code) || (code ? code.toUpperCase().replace(/./g, char => String.fromCodePoint(char.charCodeAt(0) + 127397)) : "📍");
   
   const country = Area_check(obj['country']);
+  const region = City_ValidCheck(obj['regionName']);
   const ipAddr = obj['query'] || "Unknown IP";
   const asInfo = obj['as'] || "Unknown AS";
 
-  // --- 格式化显示 ---
+  // --- 按照你的最新要求格式化 ---
   
   // 第一行：国旗 国家 IP
   const title = `${emoji} ${country}  ${ipAddr}`;
   
-  // 第二行：🦋 AS信息
-  const subtitle = `🦋 ${asInfo}`;
+  // 第二行：地区 AS信息
+  const subtitle = `${region}  ${asInfo}`;
 
   // 详细面板 (Description)
   const description = [
     '------------------------------',
     `🖥️ 服务商: ${obj['isp'] || "Unknown"}`,
-    `🌍 地区: ${City_ValidCheck(obj['regionName'])}`,
+    `🌍 地区: ${region}`,
     `🗺️ IP地址: ${ipAddr} ${emoji}`,
     `🕗 时区: ${obj['timezone'] || "Unknown"}`,
     `📍 经纬度: ${obj['lon'] || "0"},${obj['lat'] || "0"}`,
     `🪙 货币: ${obj['currency'] || "Unknown"}`
   ].join('\n\n');
 
-  // 5. 返回结果
+  // 5. 返回结果给 QX
   $done({title, subtitle, ip: ipAddr, description});
 
 } catch (e) {

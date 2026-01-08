@@ -40,7 +40,7 @@ try {
   var title = `${emoji} ${country}  ${ipAddr}`;
   
   // 第二行：AS信息
-  var subtitle = asInfo;
+  var subtitle =      asInfo;
 
   // 详细面板内容
   var description = '------------------------------' + '\n' +
